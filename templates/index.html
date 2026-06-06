@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}All Stories - StoryPost{% endblock %}
+
+{% block content %}
+<div class="stories-section">
+    <!-- Statistics Dashboard -->
+    <div class="stats-dashboard">
+        <div class="stat-card">
+            <span class="stat-number">{{ total_posts }}</span>
+            <span class="stat-label">Total Stories</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">{{ favorite_count }}</span>
+            <span class="stat-label">Favorites</span>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <h1>Your Stories</h1>
+        {% if selected_category %}
+            <div class="category-tag" style="background-color: {{ selected_category.color }}20; border: 2px solid {{ selected_category.color }};">
+                <span>Viewing: <strong>{{ selected_category.name }}</strong></span>
+                <a href="{{ url_for('index') }}" class="clear-filter">✕ Clear</a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Search and Filters -->
+    <div class="search-filter-section">
+        <form method="GET" class="search-form">
+            <div class="search-box">
+                <input type="text" name="search" placeholder="Search stories..." value="{{ search_query }}" class="search-input">
+                <button type="submit" class="search-btn">🔍</button>
+            </div>
+            
+            <div class="filter-controls">
+                <select name="sort" class="filter-select" onchange="this.form.submit()">
+                    <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+                    <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Oldest First</option>
+                    <option value="alphabetical" {% if sort_by == 'alphabetical' %}selected{% endif %}>Alphabetical</option>
+                </select>
+                
+                <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if selected_category %}category={{ selected_category.id }}&{% endif %}{% if sort_by %}sort={{ sort_by }}&{% endif %}favorites={{ 'false' if show_favorites else 'true' }}" 
+                   class="filter-btn {% if show_favorites %}active{% endif %}">
+                    Favorites
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Category Filter -->
+    <div class="categories-filter">
+        <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if sort_by %}sort={{ sort_by }}&{% endif %}" 
+           class="category-btn {% if not selected_category %}active{% endif %}">
+            All Stories
+        </a>
+        {% for category in categories %}
+            <a href="?category={{ category.id }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+               class="category-btn {% if selected_category and selected_category.id == category.id %}active{% endif %}"
+               style="border-color: {{ category.color }}; {% if selected_category and selected_category.id == category.id %}background-color: {{ category.color }}20{% endif %}">
+                {{ category.name }} ({{ category_counts.get(category.id, 0) }})
+            </a>
+        {% endfor %}
+    </div>
+    
+    {% if posts %}
+        <div class="stories-grid">
+            {% for post in posts %}
+                <div class="story-card">
+                    <div class="story-header">
+                        {% if post.category %}
+                            <span class="category-badge" style="background-color: {{ post.category.color }};">
+                                {{ post.category.name }}
+                            </span>
+                        {% endif %}
+                        {% if post.is_favorite %}
+                            <span class="favorite-badge">Favorite</span>
+                        {% endif %}
+                        <span class="status-badge status-{{ post.status }}">{{ post.status|title }}</span>
+                        <h2 class="story-title">
+                            <a href="{{ url_for('view_post', post_id=post.id) }}">{{ post.title }}</a>
+                        </h2>
+                        <div class="story-meta">
+                            <span class="story-date">{{ post.created_at.strftime('%b %d, %Y') }}</span>
+                            <span class="story-stats">{{ post.get_read_time() }} min read</span>
+                        </div>
+                    </div>
+                    
+                    <div class="story-preview">
+                        {{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}
+                    </div>
+                    
+                    <div class="story-actions">
+                        <a href="{{ url_for('view_post', post_id=post.id) }}" class="btn btn-small">Read More</a>
+                        <a href="{{ url_for('edit_post', post_id=post.id) }}" class="btn btn-small btn-secondary">Edit</a>
+                        <form method="POST" action="{{ url_for('toggle_favorite', post_id=post.id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-small btn-favorite">{% if post.is_favorite %}Unfavorite{% else %}Favorite{% endif %}</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-small btn-danger" data-confirm="Delete this story?">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-stories">
+            <p>
+                {% if search_query %}
+                    No stories match "<strong>{{ search_query }}</strong>". Try a different search!
+                {% elif selected_category %}
+                    No stories in the <strong>{{ selected_category.name }}</strong> category yet.
+                {% elif show_favorites %}
+                    No favorite stories yet.
+                {% else %}
+                    No stories yet. Start by creating your first story.
+                {% endif %}
+            </p>
+            <a href="{{ url_for('create_post') }}" class="btn btn-primary" style="display:inline-block; margin-top: 15px;">Create Your First Story</a>
+        </div>
+    {% endif %}
+
+    {% if pagination.pages > 1 %}
+        <nav class="pagination">
+            {% if pagination.has_prev %}
+                <a class="btn btn-secondary" href="{{ url_for('index', page=pagination.prev_num, search=search_query, sort=sort_by, favorites='true' if show_favorites else 'false', category=selected_category.id if selected_category else None) }}">Previous</a>
+            {% endif %}
+            <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+            {% if pagination.has_next %}
+                <a class="btn btn-primary" href="{{ url_for('index', page=pagination.next_num, search=search_query, sort=sort_by, favorites='true' if show_favorites else 'false', category=selected_category.id if selected_category else None) }}">Load More</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

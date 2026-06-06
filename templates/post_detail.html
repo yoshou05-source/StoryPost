@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} - StoryPost{% endblock %}
+
+{% block content %}
+<div class="post-detail-section">
+    <article class="post-detail">
+        <div class="post-header">
+            {% if post.category %}
+                <span class="category-badge-large" style="background-color: {{ post.category.color }};">
+                    {{ post.category.name }}
+                </span>
+            {% endif %}
+            {% if post.is_favorite %}
+                <span class="favorite-badge-large">FAVORITE</span>
+            {% endif %}
+            <span class="status-badge status-{{ post.status }}">{{ post.status|title }}</span>
+            <h1>{{ post.title }}</h1>
+            <div class="post-meta">
+                <span class="post-date">Published: {{ post.created_at.strftime('%B %d, %Y at %H:%M') }}</span>
+                {% if post.created_at != post.updated_at %}
+                    <span class="post-date">Updated: {{ post.updated_at.strftime('%B %d, %Y at %H:%M') }}</span>
+                {% endif %}
+                <span class="post-stats">{{ post.get_read_time() }} min read</span>
+            </div>
+        </div>
+        
+        <div class="post-content">{{ post.content }}</div>
+        
+        <div class="post-actions">
+            <a href="{{ url_for('edit_post', post_id=post.id) }}" class="btn btn-primary">Edit Story</a>
+            <form method="POST" action="{{ url_for('toggle_favorite', post_id=post.id) }}" style="display:inline;">
+                <button type="submit" class="btn btn-favorite">
+                    {% if post.is_favorite %}Remove from Favorites{% else %}Add to Favorites{% endif %}
+                </button>
+            </form>
+            <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" style="display:inline;">
+                <button type="submit" class="btn btn-danger" data-confirm="Delete this story permanently?">Delete Story</button>
+            </form>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">← Back to Stories</a>
+        </div>
+    </article>
+</div>
+{% endblock %}

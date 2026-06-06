@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Create New Story - StoryPost{% endblock %}
+
+{% block content %}
+<div class="form-section writing-section">
+    <h1>Create New Story</h1>
+    
+    <form method="POST" class="story-form" data-autosave-key="storypost:create">
+        <div class="form-group">
+            <label for="title">Story Title</label>
+            <input type="text" id="title" name="title" class="form-input" placeholder="Enter your story title..." required>
+        </div>
+        
+        <div class="form-group">
+            <label for="category_id">Category</label>
+            <input type="search" class="form-input category-select-search" placeholder="Find category..." data-category-select-search="category_id">
+            <select id="category_id" name="category_id" class="form-select">
+                <option value="">Select a category (optional)</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+            <a href="{{ url_for('manage_categories') }}" class="form-link">Manage categories</a>
+        </div>
+        
+        <div class="form-group">
+            <label for="content">Story Content</label>
+            <textarea id="content" name="content" class="form-textarea" placeholder="Write your story here..." rows="10" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status" class="form-select">
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+                <option value="archived">Archived</option>
+            </select>
+        </div>
+
+        <p class="draft-status" data-draft-status></p>
+        
+        <div class="form-actions writing-actions">
+            <button type="submit" class="btn btn-primary">Save Story</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

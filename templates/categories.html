@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Categories - StoryPost{% endblock %}
+
+{% block content %}
+<div class="category-manager reveal-on-scroll">
+    <section class="form-section category-form-section">
+        <h1>Story Categories</h1>
+        <p class="form-helper">Create category types, then choose one when you create or edit a story.</p>
+
+        <form method="POST" class="story-form category-form">
+            <div class="form-group">
+                <label for="name">Category Name</label>
+                <input type="text" id="name" name="name" class="form-input" placeholder="Example: Travel, Family, Work" maxlength="50" required>
+            </div>
+
+            <div class="form-group">
+                <label for="color">Category Color</label>
+                <div class="color-input-row">
+                    <input type="color" id="color" name="color" class="color-input" value="#6366f1">
+                    <span class="color-preview" data-color-preview style="background-color: #6366f1;"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" id="description" name="description" class="form-input" placeholder="Optional short description" maxlength="200">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Create Category</button>
+                <a href="{{ url_for('create_post') }}" class="btn btn-secondary">Create Story</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="categories-panel reveal-on-scroll">
+        <h2>Available Categories</h2>
+
+        {% if categories %}
+            <div class="category-tools">
+                <input type="search" class="form-input" placeholder="Search categories..." data-category-search>
+            </div>
+            <div class="category-list">
+                {% for category in categories %}
+                    <article class="category-card" data-category-name="{{ category.name|lower }} {{ (category.description or '')|lower }}">
+                        <div class="category-color" style="background-color: {{ category.color }};"></div>
+                        <div class="category-info">
+                            <h3>{{ category.name }}</h3>
+                            <p>{{ category.description or 'No description added.' }}</p>
+                            <span class="category-count">{{ category_counts.get(category.id, 0) }} stories</span>
+                        </div>
+                        <details class="category-edit">
+                            <summary class="btn btn-small btn-secondary">Edit</summary>
+                            <form method="POST" action="{{ url_for('edit_category', category_id=category.id) }}" class="category-edit-form">
+                                <label>
+                                    Name
+                                    <input type="text" name="name" class="form-input" value="{{ category.name }}" maxlength="50" required>
+                                </label>
+                                <label>
+                                    Color
+                                    <input type="color" name="color" class="color-input" value="{{ category.color }}">
+                                </label>
+                                <label>
+                                    Description
+                                    <input type="text" name="description" class="form-input" value="{{ category.description or '' }}" maxlength="200">
+                                </label>
+                                <button type="submit" class="btn btn-small btn-primary">Save</button>
+                            </form>
+                        </details>
+                        <form method="POST" action="{{ url_for('delete_category', category_id=category.id) }}">
+                            <button type="submit" class="btn btn-small btn-danger" data-confirm="Delete this category? Stories will move to Uncategorized.">Delete</button>
+                        </form>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-stories">
+                <p>No categories yet. Create your first category type.</p>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
