@@ -51,6 +51,20 @@ def clear_index_cache():
         pass
 
 
+# On startup, if the database is present but tables are missing (e.g. fresh deploy),
+# create missing tables to avoid "no such table" runtime errors in simple deployments.
+# This is a safe fallback for sqlite/local deployments and helps Render instances
+# that haven't had migrations applied yet. It silently fails on error.
+with app.app_context():
+    try:
+        from sqlalchemy import inspect
+        inspector = inspect(db.engine)
+        if not inspector.has_table('story_posts'):
+            db.create_all()
+    except Exception:
+        pass
+
+
 # Ensure SQLite enforces foreign key constraints when used
 @event.listens_for(Engine, "connect")
 def _set_sqlite_pragma(dbapi_connection, connection_record):
