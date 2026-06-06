@@ -1126,11 +1126,16 @@ body.page-ready .page-loader {
 .search-filter-section,
 .categories-filter,
 .form-section,
-.post-detail,
 .no-stories {
     opacity: 0;
     transform: translateY(18px);
     transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+/* Ensure story detail content is visible even if the reveal animation does not fire */
+.post-detail {
+    opacity: 1;
+    transform: none;
 }
 
 .reveal-on-scroll.is-visible,
