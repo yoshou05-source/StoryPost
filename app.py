@@ -16,8 +16,20 @@ app = Flask(__name__)
 # Config from environment with sensible defaults for local development
 # Use an absolute path for the default SQLite DB to avoid "unable to open database file" errors
 basedir = os.path.abspath(os.path.dirname(__file__))
-default_sqlite = f"sqlite:///{os.path.join(basedir, 'instance', 'story_posts.db')}"
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', default_sqlite)
+instance_dir = os.path.join(basedir, 'instance')
+os.makedirs(instance_dir, exist_ok=True)
+
+def ensure_sqlite_folder(uri: str) -> str:
+    if uri and uri.startswith('sqlite:///'):
+        path = uri[10:]
+        folder = os.path.dirname(path)
+        if folder:
+            os.makedirs(folder, exist_ok=True)
+    return uri
+
+default_sqlite = f"sqlite:///{os.path.join(instance_dir, 'story_posts.db')}"
+db_uri = os.getenv('DATABASE_URL', default_sqlite)
+app.config['SQLALCHEMY_DATABASE_URI'] = ensure_sqlite_folder(db_uri)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'change-this-in-production')
 
