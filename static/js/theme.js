@@ -56,6 +56,19 @@ const sweetIcon = document.getElementById('sweetIcon');
 const sweetConfirm = document.getElementById('sweetConfirm');
 const sweetCancel = document.getElementById('sweetCancel');
 
+function clearFlashMessages() {
+    const flashMessages = document.getElementById('flashMessages');
+
+    if (flashMessages) {
+        flashMessages.remove();
+    }
+
+    if (sweetOverlay) {
+        sweetOverlay.classList.remove('is-open');
+        sweetOverlay.setAttribute('aria-hidden', 'true');
+    }
+}
+
 function openSweetAlert({ title = 'Done', message = '', type = 'success', confirmText = 'OK', cancelText = '', onConfirm = null }) {
     if (!sweetOverlay) {
         if (onConfirm) onConfirm();
@@ -107,6 +120,19 @@ if (flashMessages) {
         flashMessages.remove();
     }
 }
+
+const backButton = document.querySelector('.btn-back');
+if (backButton) {
+    backButton.addEventListener('click', () => {
+        clearFlashMessages();
+    });
+}
+
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+        clearFlashMessages();
+    }
+});
 
 document.querySelectorAll('[data-confirm]').forEach((button) => {
     button.addEventListener('click', (event) => {
