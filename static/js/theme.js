@@ -103,6 +103,8 @@ if (flashMessages) {
         }
     } catch (error) {
         console.warn('Could not parse flash messages', error);
+    } finally {
+        flashMessages.remove();
     }
 }
 

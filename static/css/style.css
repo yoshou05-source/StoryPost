@@ -869,6 +869,28 @@ body.page-exit .footer {
     color: var(--secondary-btn-text);
 }
 
+.btn-back {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn-back .back-text {
+    display: inline;
+}
+
+@media (max-width: 680px) {
+    .btn-back {
+        max-width: 96px;
+        justify-content: center;
+    }
+
+    .btn-back .back-text {
+        display: none;
+    }
+}
+
 .btn-danger {
     background-color: var(--danger-color);
     color: white;
